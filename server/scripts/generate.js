@@ -1,8 +1,8 @@
-const secp = require("ethereum-cryptography/secp256k1");
+const { secp256k1 } = require("ethereum-cryptography/secp256k1");
 const { toHex } = require("ethereum-cryptography/utils");
 
-const privateKey = secp.utils.randomPrivateKey();
-constole.log("private Key: ", privateKey);
+const privateKey = secp256k1.utils.randomPrivateKey();
+console.log("private Key: ", toHex(privateKey));
 
-const publickKey = secp.getPublickKey(privateKey);
-consoole.log("publick key: ", toHex(publickKey));
+const publicKey = secp256k1.getPublicKey(privateKey);
+console.log("public key: ", toHex(publicKey));
