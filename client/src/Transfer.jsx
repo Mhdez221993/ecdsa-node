@@ -12,8 +12,10 @@ function Transfer({ address, setBalance, privateKey }) {
 
   async function transfer(evt) {
     evt.preventDefault();
+
     const messageHash = keccak256(utf8ToBytes(address));
     const signature = secp256k1.sign(messageHash, privateKey);
+    console.log("signature", signature);
 
     try {
 
@@ -23,7 +25,7 @@ function Transfer({ address, setBalance, privateKey }) {
         sender: address,
         amount: parseInt(sendAmount),
         recipient,
-        signature
+        signature,
       });
       setBalance(balance);
     } catch (ex) {
