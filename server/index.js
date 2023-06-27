@@ -32,7 +32,6 @@ app.post("/send", (req, res) => {
     return res.status(400).send({ message: "Invalid transaction" });
 
   // const sender = getEthAddress(hexToBytes(pubAddress));
-  console.log(sender);
 
   if (!balances[sender])
     return res.status(400).send({ message: "Invalid sender" });

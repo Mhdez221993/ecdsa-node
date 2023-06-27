@@ -22,7 +22,6 @@ function Transfer({ address, setBalance, privateKey }) {
     const messageHash = hashMessage(body);
     const signature = secp256k1.sign(messageHash, privateKey);
     const pubAddress = signature.recoverPublicKey(messageHash).toHex();
-    console.log(pubAddress);
 
 
     try {
