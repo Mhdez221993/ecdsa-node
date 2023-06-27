@@ -5,18 +5,21 @@ import server from "./server";
 function Wallet({ address, setAddress, balance, setBalance, privateKey, setPrivateKey }) {
   async function onChange(evt) {
     const privateKey = evt.target.value;
+    console.log(secp256k1.sign(toHex('Transfer money to: '), privateKey));
+
     setPrivateKey(privateKey);
-    const address = secp256k1.getPublicKey(privateKey);
-    setAddress(toHex(address))
+    const address = toHex(secp256k1.getPublicKey(privateKey));
+    setAddress(address);
     if (address) {
       const {
         data: { balance },
-      } = await server.get(`balance/${toHex(address)}`);
+      } = await server.get(`balance/${address}`);
       setBalance(balance);
     } else {
       setBalance(0);
     }
   }
+
 
   return (
     <div className="container wallet">
