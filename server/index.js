@@ -1,6 +1,7 @@
 const express = require("express");
-const { utf8ToBytes } = require("ethereum-cryptography/utils.js");
+const { hexToBytes, toHex } = require("ethereum-cryptography/utils.js");
 const { keccak256 } = require("ethereum-cryptography/keccak");
+const { secp256k1 } = require("ethereum-cryptography/secp256k1");
 
 const app = express();
 const cors = require("cors");
@@ -22,8 +23,19 @@ app.get("/balance/:address", (req, res) => {
 });
 
 app.post("/send", (req, res) => {
-  const { sender, recipient, amount, signature } = req.body;
-  console.log(signature);
+  const { recipient, amount, signature, messageHash, sender } = req.body;
+
+  signature.r = BigInt(signature.r);
+  signature.s = BigInt(signature.s);
+
+  if (!secp256k1.verify(signature, messageHash, sender))
+    return res.status(400).send({ message: "Invalid transaction" });
+
+  // const sender = getEthAddress(hexToBytes(pubAddress));
+  console.log(sender);
+
+  if (!balances[sender])
+    return res.status(400).send({ message: "Invalid sender" });
 
   setInitialBalance(sender);
   setInitialBalance(recipient);
@@ -45,4 +57,9 @@ function setInitialBalance(address) {
   if (!balances[address]) {
     balances[address] = 0;
   }
+}
+
+function getEthAddress(publicKey) {
+  const hash = keccak256(publicKey.slice(1, publicKey.length));
+  return toHex(hash.slice(-20));
 }

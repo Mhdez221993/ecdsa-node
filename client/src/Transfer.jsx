@@ -1,6 +1,7 @@
+import { toHex, utf8ToBytes } from "ethereum-cryptography/utils.js";
+
 import { keccak256 } from "ethereum-cryptography/keccak";
 import { secp256k1 } from "ethereum-cryptography/secp256k1";
-import { utf8ToBytes } from "ethereum-cryptography/utils.js";
 import { useState } from "react";
 import server from "./server";
 
@@ -13,19 +14,27 @@ function Transfer({ address, setBalance, privateKey }) {
   async function transfer(evt) {
     evt.preventDefault();
 
-    const messageHash = keccak256(utf8ToBytes(address));
+    const body = {
+      sender: address,
+      amount: parseInt(sendAmount),
+    }
+
+    const messageHash = hashMessage(body);
     const signature = secp256k1.sign(messageHash, privateKey);
-    console.log("signature", signature);
+    const pubAddress = signature.recoverPublicKey(messageHash).toHex();
+    console.log(pubAddress);
+
 
     try {
 
       const {
         data: { balance },
       } = await server.post(`send`, {
-        sender: address,
-        amount: parseInt(sendAmount),
+        ...body,
+        signature: JSON.parse(JSON.stringify(signature, (key, value) => typeof value === 'bigint' ? value.toString() : value)),
+        messageHash,
         recipient,
-        signature,
+        pubAddress
       });
       setBalance(balance);
     } catch (ex) {
@@ -62,30 +71,10 @@ function Transfer({ address, setBalance, privateKey }) {
 
 export default Transfer;
 
-// const messageHash = keccak256(utf8ToBytes(address));
-// const signature = secp256k1.sign(messageHash, privateKey);
-// console.log("signature", signature);
-
-// const publicKey = toHex(signature.recoverPublicKey(messageHash).toRawBytes());
-// console.log("PublicKey", publicKey === address)
-
-
-  // const signatureComponents = {
-  //   r: signature.slice(0, 32),
-  //   s: signature.slice(32, 64),
-  //   recovery: signature[64],
-  // };
-
-  // const messageHash = Buffer.from(keccak256(utf8ToBytes(from))).values();
-  // const publicKey = toHex(
-  //   signatureComponents.recoverPublicKey(messageHash).toRawBytes()
-  // );
-  // console.log(publicKey);
-
-  // if (publicKey == from) {
-      // } else {
-  //   res.status(400).send({ message: "Invalid signature" });
-  // }
+function hashMessage(msg) {
+	const hash = keccak256(utf8ToBytes(JSON.stringify(msg)));
+	return toHex(hash);
+}
 
 //   const pk1 = "f35922752b22ad1114a8b3b5d6ab9bd1bf072498ce2adeb5ceb9fb05b1b3a515";
 // const pk2 = "cd4812c89719666822777eddd2bde6e53c1b201d8a1b9ed42d7b46a658d63137";
