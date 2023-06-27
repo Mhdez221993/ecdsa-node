@@ -1,4 +1,7 @@
 const express = require("express");
+const { utf8ToBytes } = require("ethereum-cryptography/utils.js");
+const { keccak256 } = require("ethereum-cryptography/keccak");
+
 const app = express();
 const cors = require("cors");
 const port = 3042;
@@ -19,9 +22,9 @@ app.get("/balance/:address", (req, res) => {
 });
 
 app.post("/send", (req, res) => {
-  // Todo: get a signuature from the client-side application
-  // recover the public address from the signature
   const { sender, recipient, amount } = req.body;
+  const { signature } = req.header;
+  console.log(signature);
 
   setInitialBalance(sender);
   setInitialBalance(recipient);
@@ -44,7 +47,3 @@ function setInitialBalance(address) {
     balances[address] = 0;
   }
 }
-
-const pk1 = "f35922752b22ad1114a8b3b5d6ab9bd1bf072498ce2adeb5ceb9fb05b1b3a515";
-const pk2 = "cd4812c89719666822777eddd2bde6e53c1b201d8a1b9ed42d7b46a658d63137";
-const pk3 = "c77d6f5bdfceca173027f2400070f1531a99f630b5061e5536b52d3a89c2ae45";

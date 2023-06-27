@@ -1,8 +1,8 @@
 import "./App.scss";
 
+import { useState } from "react";
 import Transfer from "./Transfer";
 import Wallet from "./Wallet";
-import { useState } from "react";
 
 function App() {
   const [balance, setBalance] = useState(0);
@@ -19,7 +19,7 @@ function App() {
         privateKey={privateKey}
         setPrivateKey={setPrivateKey}
       />
-      <Transfer setBalance={setBalance} address={address} />
+      <Transfer setBalance={setBalance} address={address} privateKey={privateKey} />
     </div>
   );
 }

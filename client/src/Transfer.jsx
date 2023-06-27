@@ -1,7 +1,10 @@
+import { keccak256 } from "ethereum-cryptography/keccak";
+import { secp256k1 } from "ethereum-cryptography/secp256k1";
+import { utf8ToBytes } from "ethereum-cryptography/utils.js";
 import { useState } from "react";
 import server from "./server";
 
-function Transfer({ address, setBalance }) {
+function Transfer({ address, setBalance, privateKey }) {
   const [sendAmount, setSendAmount] = useState("");
   const [recipient, setRecipient] = useState("");
 
@@ -9,14 +12,18 @@ function Transfer({ address, setBalance }) {
 
   async function transfer(evt) {
     evt.preventDefault();
+    const messageHash = keccak256(utf8ToBytes(address));
+    const signature = secp256k1.sign(messageHash, privateKey);
 
     try {
+
       const {
         data: { balance },
       } = await server.post(`send`, {
         sender: address,
         amount: parseInt(sendAmount),
         recipient,
+        signature
       });
       setBalance(balance);
     } catch (ex) {
@@ -52,3 +59,32 @@ function Transfer({ address, setBalance }) {
 }
 
 export default Transfer;
+
+// const messageHash = keccak256(utf8ToBytes(address));
+// const signature = secp256k1.sign(messageHash, privateKey);
+// console.log("signature", signature);
+
+// const publicKey = toHex(signature.recoverPublicKey(messageHash).toRawBytes());
+// console.log("PublicKey", publicKey === address)
+
+
+  // const signatureComponents = {
+  //   r: signature.slice(0, 32),
+  //   s: signature.slice(32, 64),
+  //   recovery: signature[64],
+  // };
+
+  // const messageHash = Buffer.from(keccak256(utf8ToBytes(from))).values();
+  // const publicKey = toHex(
+  //   signatureComponents.recoverPublicKey(messageHash).toRawBytes()
+  // );
+  // console.log(publicKey);
+
+  // if (publicKey == from) {
+      // } else {
+  //   res.status(400).send({ message: "Invalid signature" });
+  // }
+
+//   const pk1 = "f35922752b22ad1114a8b3b5d6ab9bd1bf072498ce2adeb5ceb9fb05b1b3a515";
+// const pk2 = "cd4812c89719666822777eddd2bde6e53c1b201d8a1b9ed42d7b46a658d63137";
+// const pk3 = "c77d6f5bdfceca173027f2400070f1531a99f630b5061e5536b52d3a89c2ae45";
